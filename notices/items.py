@@ -5,12 +5,6 @@
 
 import scrapy
 
-
-class NoticesItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass 
-
 class CnpqItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()

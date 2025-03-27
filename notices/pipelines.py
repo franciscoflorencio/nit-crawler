@@ -6,6 +6,31 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
+from datetime import datetime
+
+class EacPipeline:
+    def process_item(self, item, spider):
+        if isinstance(item, str):
+            spider.logger.warning(f"Unexpected string item: {item}")
+            return item
+
+        adapter = ItemAdapter(item)
+
+        field_names = adapter.field_names()
+        for field_name in field_names:
+            if field_name == 'day_deadline':
+                day_deadline = adapter['day_deadline']
+                if not day_deadline:
+                    adapter['day_deadline'] = 'No deadline day'
+                else:
+                    try:
+                        date_obj = datetime.strptime(day_deadline, '%d %B %Y')
+                        adapter['day_deadline'] = date_obj.strftime('%d/%m/%Y')
+                    except ValueError as e:
+                        spider.logger.error(f"Error converting date: {e}")
+                        adapter['day_deadline'] = 'No deadline day'
+        return item
+
 
 class CnpqPipeline:
     def process_item(self, item, spider):

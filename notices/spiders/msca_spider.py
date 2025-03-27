@@ -5,6 +5,11 @@ from notices.items import EacItem
 class MarieCurieSpider(scrapy.Spider):
     name = "msca"
     allowed_domains = ["marie-sklodowska-curie-actions.ec.europa.eu"]
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'notices.pipelines.EacPipeline': 100
+        }
+    }
 
     # Base API URL
     api_url = "https://marie-sklodowska-curie-actions.ec.europa.eu/eac-api/content?language=en&page%5Boffset%5D={offset}&page%5Blimit%5D=10&sortonly=false&type=calls"

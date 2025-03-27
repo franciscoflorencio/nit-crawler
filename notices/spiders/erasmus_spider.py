@@ -6,6 +6,9 @@ from notices.items import EacItem
 class EramusSpider(scrapy.Spider):
     name = "erasmus"
     custom_settings = {
+            'ITEM_PIPELINES': {
+                'notices.pipelines.EacPipeline': 100
+            },
             'DOWNLOAD_DELAY': 7,
             'CONCURRENT_REQUESTS': 7,
             'RETRY_TIMES': 35,
