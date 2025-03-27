@@ -1,0 +1,16 @@
+# Python gitignore
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Scrapy specific
+.scrapy/
