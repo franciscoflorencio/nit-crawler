@@ -27,3 +27,16 @@ class FaperjItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
+
+class UkriItem(scrapy.Item):
+    title = scrapy.Field()
+    opportunity_link = scrapy.Field()
+    opportunity_status = scrapy.Field()
+    funders = scrapy.Field()
+    funders_url = scrapy.Field()
+    funding_type = scrapy.Field()
+    total_fund = scrapy.Field()
+    award_range = scrapy.Field()
+    publication_date = scrapy.Field()
+    opening_date = scrapy.Field()
+    closing_date = scrapy.Field()
