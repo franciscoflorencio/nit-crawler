@@ -50,22 +50,18 @@ class CnpqPipeline:
 
 class FaperjPipeline:
     def process_item(self, item, spider):
-        if isinstance(item, str):
-            spider.logger.warning(f"Unexpected string item: {item}")
-            return item
-        
         adapter = ItemAdapter(item)
-        
-        if 'title' in adapter.field_names():
-            title = adapter['title']
-            if not title.startswith('Edital'):
-                spider.logger.info(f"Item dropped due to title: {title}")
-                raise DropItem(f"Item dropped because title does not start with 'Edital': {title}")
-        
-        if 'description' in adapter.field_names():
-            description = adapter['description']
-            if not description.startswith('Lançamento') or not description.startswith('Publicado'):
-                spider.logger.info(f"Item dropped due to description: {description}")
-                raise DropItem(f"Item dropped because description does not start with 'Lançamento' or 'Publicado': {description}")
-        
+
+        # Ensure the title field exists
+        if 'title' not in adapter.field_names():
+            spider.logger.warning(f"Item dropped due to missing title: {item}")
+            raise DropItem(f"Item dropped because it does not contain a title: {item}")
+
+        # Validate the title starts with "Edital"
+        title = adapter['title']
+        if not title.startswith('Edital'):
+            spider.logger.info(f"Item dropped due to title: {title}")
+            raise DropItem(f"Item dropped because title does not start with 'Edital': {title}")
+
+        # Return the item if it passes validation
         return item
