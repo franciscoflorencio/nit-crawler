@@ -15,7 +15,7 @@ class UkriSpider(scrapy.Spider):
         for page in response.css('a.page-numbers').get():
             yield response.follow(page, self.parse)
 
-
+        #pega as oportunidades
         for opportunity in response.css('div[id^="post-"]'):
             ukri_item = UkriItem()
             

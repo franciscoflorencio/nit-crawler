@@ -40,3 +40,9 @@ class UkriItem(scrapy.Item):
     publication_date = scrapy.Field()
     opening_date = scrapy.Field()
     closing_date = scrapy.Field()
+
+class DaadItem(scrapy.Item):
+    title = scrapy.Field()
+    observation = scrapy.Field()
+    description = scrapy.Field()
+    link = scrapy.Field()
