@@ -63,5 +63,11 @@ class FaperjPipeline:
             spider.logger.info(f"Item dropped due to title: {title}")
             raise DropItem(f"Item dropped because title does not start with 'Edital': {title}")
 
+        # Validate the link is a valid URL
+        link = adapter['link']
+        if not link.startswith('http'):
+            spider.logger.info(f"Item dropped due to invalid link: {link}")
+            raise DropItem(f"Item dropped because link is not a valid URL: {link}")
+
         # Return the item if it passes validation
         return item

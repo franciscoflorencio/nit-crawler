@@ -20,19 +20,21 @@ class FaperjSpider(scrapy.Spider):
         self.logger.info(f"Found {len(notices)} notices")
 
         for notice in notices:
-            # Extract the first link (title)
+            # Extract the first link (title and URL)
             title = notice.css('a::text').get()
+            link = notice.css('a::attr(href)').get()
 
             # Extract the description (all text after the title within the <p> tag)
             description_parts = notice.css('::text').getall()
             description = ' '.join([part.strip() for part in description_parts if part.strip() and part != title])
 
-            # Skip if no title is found
-            if not title:
+            # Skip if no title or link is found
+            if not title or not link:
                 continue
 
-            # Populate the item with title and description
+            # Populate the item with title, description, and link
             item = FaperjItem()
             item['title'] = title.strip()
             item['description'] = description.strip()
+            item['link'] = response.urljoin(link)  # Convert relative URLs to absolute
             yield item
