@@ -71,3 +71,7 @@ class FaperjPipeline:
 
         # Return the item if it passes validation
         return item
+
+class FinepPipeline:
+    def process_item(self, item, spider):
+        return item
