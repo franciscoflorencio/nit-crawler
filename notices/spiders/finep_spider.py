@@ -18,6 +18,12 @@ class FinepSpider(scrapy.Spider):
             full_url = response.urljoin(link)
             yield scrapy.Request(url=full_url, callback=self.parse_details)
 
+         # Handle pagination
+        next_page = response.css("li.pagination-next a::attr(href)").get()
+        if next_page:
+            next_page_url = response.urljoin(next_page)
+            yield scrapy.Request(url=next_page_url, callback=self.parse)
+            
     def parse_details(self, response):
         # Extract data from the individual page
         title = response.css("h2.tit_pag a::text").get()
