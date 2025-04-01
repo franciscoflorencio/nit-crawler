@@ -76,6 +76,7 @@ class FinepPipeline:
     def process_item(self, item, spider):
         # Parse the current date
         current_year = datetime.now().year
+        current_date = datetime.now().date()
 
         # Check if the 'date' field is more than 2 years old
         if 'date' in item and item['date']:
@@ -88,7 +89,7 @@ class FinepPipeline:
         if 'deadline' in item and item['deadline']:
             item_deadline = datetime.strptime(item['deadline'], "%d/%m/%Y")
             if item_deadline < current_date:  # Deadline has passed
-                raise scrapy.exceptions.DropItem(f"Item deadline has passed: {item['deadline']}")
+                print("pipeline error!!")
 
         # If the item passes the check, return it for saving
         return item

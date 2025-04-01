@@ -3,11 +3,13 @@ from notices.items import FinepItem
 
 class FinepSpider(scrapy.Spider):
     name = "finep"
+    """
     custom_settings = {
         'ITEM_PIPELINES': {
             'notices.pipelines.FinepPipeline': 303,
         },
     }
+    """
     allowed_domains = ["finep.gov.br"]
     start_urls = ["http://www.finep.gov.br/chamadas-publicas/chamadaspublicas?situacao=aberta"]
 
