@@ -33,3 +33,13 @@ class DaadSpider(scrapy.Spider):
             daad_item['observation'] = opportunity.css('p::text').get()
             
             yield daad_item
+
+        pagination_options = response.css('select#pagination option[value]')
+        for option in pagination_options:
+            next_page = option.attrib['value']
+            if next_page: 
+                yield response.follow(
+                    next_page,
+                    callback=self.parse,
+                    meta={"playwright": True}
+                    )
