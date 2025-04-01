@@ -71,3 +71,24 @@ class FaperjPipeline:
 
         # Return the item if it passes validation
         return item
+
+class FinepPipeline:
+    def process_item(self, item, spider):
+        # Parse the current date
+        current_year = datetime.now().year
+
+        # Check if the 'date' field is more than 2 years old
+        if 'date' in item and item['date']:
+            item_year = int(item['date'].split("/")[-1])  # Extract the year from the date
+            if item_year < current_year - 2:
+                # Stop the spider if the date is more than 2 years old
+                spider.crawler.engine.close_spider(spider, f"Stopping spider: Item date is more than 2 years old ({item['date']})")
+
+         # Check if the 'deadline' field exists and is still valid
+        if 'deadline' in item and item['deadline']:
+            item_deadline = datetime.strptime(item['deadline'], "%d/%m/%Y")
+            if item_deadline < current_date:  # Deadline has passed
+                raise scrapy.exceptions.DropItem(f"Item deadline has passed: {item['deadline']}")
+
+        # If the item passes the check, return it for saving
+        return item

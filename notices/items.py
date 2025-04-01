@@ -46,3 +46,10 @@ class DaadItem(scrapy.Item):
     observation = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
+
+class FinepItem(scrapy.Item):
+    title = scrapy.Field()
+    description = scrapy.Field()
+    link = scrapy.Field()
+    deadline = scrapy.Field()
+    date = scrapy.Field()
