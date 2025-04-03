@@ -53,3 +53,10 @@ class FinepItem(scrapy.Item):
     link = scrapy.Field()
     deadline = scrapy.Field()
     date = scrapy.Field()
+
+class EuraexxItem(scrapy.Item):
+    title = scrapy.Field()
+    link = scrapy.Field()
+    description = scrapy.Field()
+    deadline = scrapy.Field()
+    date = scrapy.Field()
