@@ -43,12 +43,6 @@ mit_crawler/
 └── README.md                # This file
 ```
 
-## Current Status
-
-The project currently includes functional spiders for several funding agencies, with ongoing development to expand coverage and improve data quality.
-
-![Project Structure](image.png)
-
 ## Installation & Usage
 
 1. Clone the repository
