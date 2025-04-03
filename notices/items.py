@@ -53,3 +53,12 @@ class FinepItem(scrapy.Item):
     link = scrapy.Field()
     deadline = scrapy.Field()
     date = scrapy.Field()
+
+class FapespItem(scrapy.Item):
+    title = scrapy.Field()
+    institution = scrapy.Field()
+    city = scrapy.Field()
+    deadline = scrapy.Field()
+    description = scrapy.Field()
+    link = scrapy.Field()
+    
