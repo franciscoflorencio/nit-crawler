@@ -3,6 +3,11 @@ from notices.items import UkriItem
 
 class UkriSpider(scrapy.Spider):
     name = "ukri"
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'notices.pipelines.UkriPipeline': 300,
+        },
+    }
     allowed_domains = ["www.ukri.org"]
     start_urls = ["https://www.ukri.org/opportunity/"]
 

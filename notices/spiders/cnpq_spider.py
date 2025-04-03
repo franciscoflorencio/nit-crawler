@@ -24,16 +24,19 @@ class CnpqSpider(scrapy.Spider):
         bottoms = response.css('div.bottom-content')
         row_fluid = bottoms.css('div.row-fluid')
 
+
         for i, notice in enumerate(notices):
+
+            date_text = response.css('div.inscricao ul.datas li::text')[i]
+            dates = str(date_text).split(' a ')
+
             item = CnpqItem()
             item['title'] = notice.css('h4::text').get(default='').strip()
             # Get all paragraphs of the current notice
             description_paragraphs = notice.css('p::text').getall()
             item['description'] = [desc.strip() for desc in description_paragraphs]
-            inscriptions = notice.css('div.inscricao li::text').getall()
-            # Join all inscription deadlines if needed
-            item['deadline'] = ' '.join(inscriptions).strip()
-            # Get link (same approach)
+            item['opening_date'] = dates[0]
+            item['closing_date'] = dates[1]
             item['link'] = row_fluid.css('a.btn')[i].attrib['href'] if i < len(row_fluid.css('a.btn')) else ''
             yield item
 
