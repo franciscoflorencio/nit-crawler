@@ -8,7 +8,8 @@ import scrapy
 class CnpqItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
-    deadline = scrapy.Field()
+    opening_date = scrapy.Field()
+    closing_date = scrapy.Field()
     link = scrapy.Field()
 
 class EacItem(scrapy.Item):
@@ -17,11 +18,6 @@ class EacItem(scrapy.Item):
     time_deadline = scrapy.Field()
     deadline = scrapy.Field()
     link = scrapy.Field()
-
-class QuoteItem(scrapy.Item):
-    text = scrapy.Field()
-    author = scrapy.Field()
-    tags = scrapy.Field()
     
 class FaperjItem(scrapy.Item):
     title = scrapy.Field()
