@@ -58,3 +58,10 @@ class FapespItem(scrapy.Item):
     description = scrapy.Field()
     link = scrapy.Field()
     
+class AnrItem(scrapy.Item):
+   title = scrapy.Field()
+   observation = scrapy.Field()
+   opening_date = scrapy.Field()
+   closing_date = scrapy.Field()
+   link = scrapy.Field()
+   description = scrapy.Field()
