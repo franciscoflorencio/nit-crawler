@@ -7,10 +7,24 @@ class FapespSpider(scrapy.Spider):
     start_urls = ["https://fapesp.br/oportunidades/"]
 
     custom_settings = {
-        "PLAYWRIGHT_BROWSER_TYPE": "chromium",
-        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "ROBOTSTXT_OBEY": False
+        "PLAYWRIGHT_BROWSER_TYPE": "chromium",   
+        "PLAYWRIGHT_IGNORE_HTTPS_ERRORS": True,  
+        "PLAYWRIGHT_CONTEXT_ARGS": {
+            "ignore_https_errors": True,  
+            "viewport": {"width": 1280, "height": 720},
+        },
+        "PLAYWRIGHT_PAGE_GOTO_KWARGS": {
+            "wait_until": "domcontentloaded",  
+            "timeout": 60_000,  
+        },
+        "DOWNLOAD_DELAY": 5.0,  
+        "ROBOTSTXT_OBEY": False,
+
+        'ITEM_PIPELINES': {
+            'notices.pipelines.FapespPipeline': 300,
+        },
     }
+
     def start_requests(self):
         url = "https://fapesp.br/oportunidades/"
         yield scrapy.Request(url, meta={"playwright": True})

@@ -117,3 +117,10 @@ class UkriPipeline:
                         spider.logger.error(f"Error converting date: {e}")
                         adapter['publication_date'] = 'No publication date'
         return item
+
+class FapespPipeline:
+    def process_item(self, item, spider):
+        if item.get('link') and not item['link'].startswith('http'):
+            item['link'] = 'https://fapesp.br' + item['link']
+        return item
+
