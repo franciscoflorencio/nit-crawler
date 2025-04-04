@@ -32,7 +32,7 @@ class CnpqSpider(scrapy.Spider):
             item['description'] = [desc.strip() for desc in description_paragraphs]
             inscriptions = notice.css('div.inscricao li::text').getall()
             # Join all inscription deadlines if needed
-            item['deadline'] = ' '.join(inscriptions).strip()
+            item['closing_date'] = ' '.join(inscriptions).strip()
             # Get link (same approach)
             item['link'] = row_fluid.css('a.btn')[i].attrib['href'] if i < len(row_fluid.css('a.btn')) else ''
             yield item

@@ -8,7 +8,7 @@ import scrapy
 class CnpqItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
-    deadline = scrapy.Field()
+    closing_date = scrapy.Field()
     link = scrapy.Field()
 
 class EacItem(scrapy.Item):
@@ -51,12 +51,12 @@ class FinepItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
-    deadline = scrapy.Field()
-    date = scrapy.Field()
+    closing_date = scrapy.Field()
+    opening_date = scrapy.Field()
 
 class EuraexxItem(scrapy.Item):
     title = scrapy.Field()
     link = scrapy.Field()
     description = scrapy.Field()
-    deadline = scrapy.Field()
-    date = scrapy.Field()
+    closing_date = scrapy.Field()
+    opening_date = scrapy.Field()
