@@ -31,13 +31,13 @@ class FinepSpider(scrapy.Spider):
         title = response.css("h2.tit_pag a::text").get()
         description = " ".join(response.css("div.group.desc div.text p::text").getall()).strip()
         date = response.xpath("//div[contains(., 'Data de Publicação:')]/following-sibling::div[@class='text']/text()").get()
-        deadline = response.xpath("//div[contains(., 'Prazo para envio de propostas até:')]/following-sibling::div[@class='text']/text()").get()
+        closing_date = response.xpath("//div[contains(., 'Prazo para envio de propostas até:')]/following-sibling::div[@class='text']/text()").get()
 
         # Create and yield the item
         yield FinepItem(
             title=title,
             description=description,
             date=date,
-            deadline=deadline,
+            closing_date=closing_date,
             link=response.url
         )

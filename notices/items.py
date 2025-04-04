@@ -14,9 +14,8 @@ class CnpqItem(scrapy.Item):
 
 class EacItem(scrapy.Item):
     title = scrapy.Field()
-    day_deadline = scrapy.Field()
-    time_deadline = scrapy.Field()
-    deadline = scrapy.Field()
+    closing_date = scrapy.Field()
+    closing_date = scrapy.Field()
     link = scrapy.Field()
     
 class FaperjItem(scrapy.Item):
@@ -47,14 +46,14 @@ class FinepItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
-    deadline = scrapy.Field()
+    closing_date = scrapy.Field()
     date = scrapy.Field()
 
 class FapespItem(scrapy.Item):
     title = scrapy.Field()
     institution = scrapy.Field()
     city = scrapy.Field()
-    deadline = scrapy.Field()
+    closing_date = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
     

@@ -30,8 +30,8 @@ class EramusSpider(scrapy.Spider):
         for funding in fundings:
             item = EacItem()
             item['title'] = funding.get('title', 'No title')
-            item['day_deadline'] = funding.get('deadlineDate', 'No deadline day')
-            item['time_deadline'] = funding.get('deadlineTime', 'No deadline time')
+            item['closing_date'] = funding.get('deadlineDate', 'No deadline day')
+            item['closing_time'] = funding.get('deadlineTime', 'No deadline time')
             item['link'] = response.urljoin(funding.get('url', 'No link'))
             yield item
 
