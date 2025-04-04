@@ -35,7 +35,7 @@ class FapespSpider(scrapy.Spider):
                     title = opportunity.css('strong.title::text').get().strip(),
                     institution = opportunity.xpath('.//span[@class="text-principal"]/strong[contains(text(), "Instituição")]/following-sibling::text()[1]').get().strip(),
                     city = opportunity.xpath('.//span[@class="text-principal"]/strong[contains(text(), "Cidade")]/following-sibling::text()[1]').get().strip(),
-                    deadline = opportunity.xpath('.//span[@class="text-principal"]/strong[contains(text(), "Inscrições até") or contains(text(), "Deadline")]/following-sibling::text()[1]').get().strip(),
+                    closing_date = opportunity.xpath('.//span[@class="text-principal"]/strong[contains(text(), "Inscrições até") or contains(text(), "Deadline")]/following-sibling::text()[1]').get().strip(),
                     description = opportunity.css('span.text-resumo p::text').get().strip(),
                     link = opportunity.css('a.link_col::attr(href)').get()
             )
