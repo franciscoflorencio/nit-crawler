@@ -1,5 +1,5 @@
 import scrapy
-from notices.items import EuraexxItem  # Import the EuraexxItem
+from notices.items import EuraexxItem 
 
 class EuraexxSpider(scrapy.Spider):
     name = "euraexx"
@@ -31,7 +31,7 @@ class EuraexxSpider(scrapy.Spider):
     def parse(self, response):
         # Extract all job postings
         results = response.xpath("//article[@class='ecl-content-item']")
-        self.logger.info(f"Found {len(results)} results")
+        self.logger.info(f"Found {len(results)} results on this page") 
 
         for result in results:
             # Extract title
@@ -47,7 +47,7 @@ class EuraexxSpider(scrapy.Spider):
             opening_date = result.xpath(".//li[contains(@class, 'ecl-content-block__primary-meta-item') and contains(text(), 'Posted on:')]/text()").get(default="").replace("Posted on:", "").strip()
             closing_date = result.xpath(".//div[contains(@class, 'id-Deadline')]//div[@class='ecl-text-standard ecl-u-d-flex ecl-u-flex-column']/text()").get(default="").strip()
 
-            # Create and yield the item
+            # Create and yield each part of the item
             item = EuraexxItem(
                 title=title,
                 link=link,
@@ -56,3 +56,13 @@ class EuraexxSpider(scrapy.Spider):
                 closing_date=closing_date,
             )
             yield item
+
+        # Pagination logic handle
+        current_page = int(response.url.split("page=")[-1]) if "page=" in response.url else 0
+        next_page = current_page + 1
+
+        # Check if there is a next page
+        next_page_url = f"https://euraxess.ec.europa.eu/jobs/search?f%5B0%5D=offer_type%3Afunding&page={next_page}"
+        if response.xpath("//li[@class='ecl-pagination__item ecl-pagination__item--next']"):
+            self.logger.info(f"Navigating to next page: {next_page_url}")
+            yield scrapy.Request(next_page_url, callback=self.parse)
