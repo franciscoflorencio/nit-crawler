@@ -47,6 +47,14 @@ class FinepItem(scrapy.Item):
     description = scrapy.Field()
     link = scrapy.Field()
     closing_date = scrapy.Field()
+    opening_date = scrapy.Field()
+
+class EuraexxItem(scrapy.Item):
+    title = scrapy.Field()
+    link = scrapy.Field()
+    description = scrapy.Field()
+    closing_date = scrapy.Field()
+    opening_date = scrapy.Field()
     date = scrapy.Field()
 
 class FapespItem(scrapy.Item):

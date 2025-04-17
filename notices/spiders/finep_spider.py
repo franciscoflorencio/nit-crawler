@@ -37,6 +37,8 @@ class FinepSpider(scrapy.Spider):
         yield FinepItem(
             title=title,
             description=description,
+            opening_date=date,
+            closing_date=deadline,
             date=date,
             closing_date=closing_date,
             link=response.url
