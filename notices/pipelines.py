@@ -93,3 +93,32 @@ class EuraexxPipeline:
 
         return item
     
+
+class UkriPipeline:
+    def process_item(self, item, spider):
+        if isinstance(item, str):
+            spider.logger.warning(f"Unexpected string item: {item}")
+            return item
+
+        adapter = ItemAdapter(item)
+
+        field_names = adapter.field_names()
+        for field_name in field_names:
+            if field_name == 'publication_date':
+                day_deadline = adapter['publication_date']
+                if not day_deadline:
+                    adapter['publication_date'] = 'No deadline day'
+                else:
+                    try:
+                        date_obj = datetime.strptime(day_deadline, '%d %B %Y')
+                        adapter['publication_date'] = date_obj.strftime('%d/%m/%Y')
+                    except ValueError as e:
+                        spider.logger.error(f"Error converting date: {e}")
+                        adapter['publication_date'] = 'No publication date'
+        return item
+
+class FapespPipeline:
+    def process_item(self, item, spider):
+        if item.get('link') and not item['link'].startswith('http'):
+            item['link'] = 'https://fapesp.br' + item['link']
+        return item

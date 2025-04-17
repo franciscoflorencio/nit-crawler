@@ -8,20 +8,15 @@ import scrapy
 class CnpqItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
+    opening_date = scrapy.Field()
     closing_date = scrapy.Field()
     link = scrapy.Field()
 
 class EacItem(scrapy.Item):
     title = scrapy.Field()
-    day_deadline = scrapy.Field()
-    time_deadline = scrapy.Field()
-    deadline = scrapy.Field()
+    closing_date = scrapy.Field()
+    closing_date = scrapy.Field()
     link = scrapy.Field()
-
-class QuoteItem(scrapy.Item):
-    text = scrapy.Field()
-    author = scrapy.Field()
-    tags = scrapy.Field()
     
 class FaperjItem(scrapy.Item):
     title = scrapy.Field()
@@ -60,3 +55,20 @@ class EuraexxItem(scrapy.Item):
     description = scrapy.Field()
     closing_date = scrapy.Field()
     opening_date = scrapy.Field()
+    date = scrapy.Field()
+
+class FapespItem(scrapy.Item):
+    title = scrapy.Field()
+    institution = scrapy.Field()
+    city = scrapy.Field()
+    closing_date = scrapy.Field()
+    description = scrapy.Field()
+    link = scrapy.Field()
+    
+class AnrItem(scrapy.Item):
+   title = scrapy.Field()
+   observation = scrapy.Field()
+   opening_date = scrapy.Field()
+   closing_date = scrapy.Field()
+   link = scrapy.Field()
+   description = scrapy.Field()
