@@ -9,6 +9,7 @@ class EramusSpider(scrapy.Spider):
             'ITEM_PIPELINES': {
                 'notices.pipelines.EacPipeline': 100
             },
+            'ROBOTSTXT_OBEY': False,
             'DOWNLOAD_DELAY': 7,
             'CONCURRENT_REQUESTS': 7,
             'RETRY_TIMES': 35,
