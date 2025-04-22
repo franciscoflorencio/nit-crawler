@@ -15,7 +15,7 @@ class CnpqItem(scrapy.Item):
 class EacItem(scrapy.Item):
     title = scrapy.Field()
     closing_date = scrapy.Field()
-    closing_date = scrapy.Field()
+    closing_time = scrapy.Field()
     link = scrapy.Field()
     
 class FaperjItem(scrapy.Item):

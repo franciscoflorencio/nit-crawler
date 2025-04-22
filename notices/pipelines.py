@@ -90,7 +90,8 @@ class FinepPipeline:
 
 class EuraexxPipeline:
     def process_item(self, item, spider):
-
+        if item.get('link') and not item['link'].startswith('http'):
+            item['link'] = 'https://euraxess.ec.europa.eu' + item['link']
         return item
     
 

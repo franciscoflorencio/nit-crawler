@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-The MIT Crawler is a Scrapy-based web scraping project designed to collect funding opportunity data from Brazilian and European research funding websites. This project is developed under the auspices of NIT/Farmanguinhos, a subunit of Fiocruz (Oswaldo Cruz Foundation).
+The NIT Crawler is a Scrapy-based web scraping project designed to collect funding opportunity data from Brazilian and European research funding websites. This project is developed under the auspices of NIT/Farmanguinhos, a subunit of Fiocruz (Oswaldo Cruz Foundation).
 
 ## Key Features
 
@@ -28,7 +28,7 @@ The MIT Crawler is a Scrapy-based web scraping project designed to collect fundi
 ## Project Structure
 
 ```
-mit_crawler/
+nit_crawler/
 ├── notices/                 # Main project package
 │   ├── spiders/             # Spider implementations
 │   │   ├── cmp_spider.py    # CMP funding spider
