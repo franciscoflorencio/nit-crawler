@@ -81,3 +81,17 @@ class AnrItem(scrapy.Item):
     closing_date = scrapy.Field()
     link = scrapy.Field()
     description = scrapy.Field()
+
+
+class EurekaItem(scrapy.Item):
+    title = scrapy.Field()
+    closing_date = scrapy.Field()
+    opening_date = scrapy.Field()
+    link = scrapy.Field()
+    image_url = scrapy.Field()
+    countries = scrapy.Field()
+    description = scrapy.Field()
+    scope = scrapy.Field()
+    timeframe = scrapy.Field()
+    funding_details = scrapy.Field()
+    status = scrapy.Field()

@@ -136,3 +136,37 @@ class FapespPipeline:
         if item.get("link") and not item["link"].startswith("http"):
             item["link"] = "https://fapesp.br" + item["link"]
         return item
+
+
+class EurekaPipeline:
+    def process_item(self, item, spider):
+        if isinstance(item, str):
+            spider.logger.warning(f"Unexpected string item: {item}")
+            return item
+
+        adapter = ItemAdapter(item)
+
+        field_names = adapter.field_names()
+        for field_name in field_names:
+            if field_name == "closing_date":
+                day_deadline = adapter["closing_date"]
+                if not day_deadline:
+                    pass
+                else:
+                    try:
+                        date_obj = datetime.strptime(day_deadline, "%d %B %Y")
+                        adapter["closing_date"] = date_obj.strftime("%d/%m/%Y")
+                    except ValueError as e:
+                        spider.logger.error(f"Error converting date: {e}")
+
+            elif field_name == "opening_date":
+                day_deadline = adapter["opening_date"]
+                if not day_deadline:
+                    pass
+                else:
+                    try:
+                        date_obj = datetime.strptime(day_deadline, "%d %B %Y")
+                        adapter["opening_date"] = date_obj.strftime("%d/%m/%Y")
+                    except ValueError as e:
+                        spider.logger.error(f"Error converting date: {e}")
+        return item
