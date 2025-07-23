@@ -32,6 +32,7 @@ The NIT Crawler is a Scrapy-based web scraping project designed to collect fundi
 ```
 nit_crawler/
 ├── notices/                 # Main project package
+│   ├── results_spiders/     # Spiders output
 │   ├── spiders/             # Spider implementations
 │   │   ├── cmp_spider.py    # CMP funding spider
 │   │   ├── dead_spider.py   # DEAD.org.br spider
