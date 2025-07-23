@@ -23,13 +23,16 @@ The NIT Crawler is a Scrapy-based web scraping project designed to collect fundi
 ### Development
 - **Initial Developers**:
   - Francisco Theodoro Arantes Florencio ([GitHub](https://github.com/franciscoflorencio))
+ **Developer**:
   - Vitor Hugo Guerra Guimarães de Sousa ([GitHub](https://github.com/GuerraVitor/))
+
 
 ## Project Structure
 
 ```
 nit_crawler/
 ├── notices/                 # Main project package
+│   ├── results_spiders/     # Spiders output
 │   ├── spiders/             # Spider implementations
 │   │   ├── cmp_spider.py    # CMP funding spider
 │   │   ├── dead_spider.py   # DEAD.org.br spider
@@ -48,7 +51,12 @@ nit_crawler/
 1. Clone the repository
 2. Set up a Python virtual environment
 3. Install dependencies with `pip install -r requirements.txt`
-4. Run spiders using `scrapy crawl <spider_name>`
+-4. Run spiders using `scrapy crawl <spider_name>`
++4. Run spiders:
++   - To run a specific spider: `scrapy crawl <spider_name>`
++   - To run all spiders at once: `scrapy crawlall`
++5. Find the output: Spider results are automatically saved as JSON files in the `results_spiders/` directory.
+
 
 ## Contribution Guidelines
 
