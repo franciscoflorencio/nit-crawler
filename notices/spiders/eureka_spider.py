@@ -1,7 +1,5 @@
-
 import scrapy
 from notices.items import EurekaItem
-from scrapy_playwright.page import PageMethod
 
 
 class EurekaSpider(scrapy.Spider):
@@ -23,7 +21,6 @@ class EurekaSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        from scrapy_playwright.page import PageMethod
         for url in self.start_urls:
             yield scrapy.Request(
                 url,
@@ -31,18 +28,17 @@ class EurekaSpider(scrapy.Spider):
                     "playwright": True,
                     "playwright_include_page": True,
                     "playwright_context_kwargs": {"ignore_https_errors": True},
-                    "playwright_page_methods": [
-                        PageMethod("wait_for_selector", "div.shadow-lg.group", timeout=10000),
-                    ],
                 },
                 callback=self.parse,
             )
 
     def parse(self, response):
-        for card in response.css("div.shadow-lg.group"):
-            link = card.css("a[aria-label]::attr(href)").get()
-            title = card.css("a[aria-label]::attr(aria-label)").get()
-            closing_date = None  # Adjust if you find a selector for deadline
+        for card in response.css("div.bg-white.group"):
+            link = card.css("a.h-full.flex.flex-col::attr(href)").get()
+            title = card.css("h2.heading-md.mt-3::text").get()
+            closing_date = card.css(
+                "div.flex.items-center.justify-end.font-inconsolata.text-xs.font-bold::text"
+            ).re_first(r"Deadline\s*(.*)")
             image_url = card.css("img::attr(src)").get()
             item = EurekaItem(
                 title=title.strip() if title else "",
@@ -52,35 +48,26 @@ class EurekaSpider(scrapy.Spider):
             )
             if link:
                 yield response.follow(
-                    response.urljoin(link),
+                    link,
                     callback=self.parse_opportunity,
                     meta={
                         "item": item,
                         "playwright": True,
                         "playwright_include_page": True,
-                        "playwright_context_kwargs": {"ignore_https_errors": True},
-                        "playwright_page_methods": [
-                            PageMethod("wait_for_selector", "h1.heading-xl", timeout=10000),
-                        ],
                     },
                 )
             else:
                 yield item
 
         # Pagination
-        next_page = response.css("a.pagination__next::attr(href)").get()
+        next_page = response.css("a.next.page-numbers::attr(href)").get()
         if next_page:
-            next_page_url = response.urljoin(next_page)
-            from scrapy_playwright.page import PageMethod
             yield scrapy.Request(
-                next_page_url,
+                next_page,
                 meta={
                     "playwright": True,
                     "playwright_include_page": True,
                     "playwright_context_kwargs": {"ignore_https_errors": True},
-                    "playwright_page_methods": [
-                        PageMethod("wait_for_selector", "div.shadow-lg.group", timeout=10000),
-                    ],
                 },
                 callback=self.parse,
             )
