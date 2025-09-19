@@ -1,4 +1,5 @@
 import scrapy
+from scrapy_playwright.page import PageMethod
 from notices.items import EurekaItem
 
 
@@ -20,57 +21,66 @@ class EurekaSpider(scrapy.Spider):
         },
     }
 
-    def start_requests(self):
-        for url in self.start_urls:
-            yield scrapy.Request(
-                url,
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                    "playwright_context_kwargs": {"ignore_https_errors": True},
-                },
-                callback=self.parse,
-            )
+    def _get_playwright_meta(self):
+        """Returns the base metadata for a Playwright request."""
+        return {
+            "playwright": True,
+            "playwright_include_page": True,
+            "playwright_page_coroutines": [
+                PageMethod("set_default_timeout", 30 * 1000),
+                PageMethod(
+                    "route",
+                    "**/*",
+                    lambda route: (
+                        route.abort()
+                        if route.request.resource_type in ("image", "font", "stylesheet")
+                        else route.continue_()
+                    ),
+                ),
+            ],
+        }
 
-    def parse(self, response):
-        for card in response.css("div.relative.rounded-lg.overflow-hidden.shadow-lg.group"):
-            link = card.css("a.absolute.inset-0.z-30::attr(href)").get()
-            title = card.css("h3.text-white::text").get()
-            closing_date = card.css(
-                "div.absolute.top-4 div.text-lg::text"
-            ).re_first(r"Deadline:\s*(.*)")
-            image_url = card.css("img::attr(src)").get()
-            item = EurekaItem(
-                title=title.strip() if title else "",
-                closing_date=closing_date.strip() if closing_date else "",
-                link=response.urljoin(link) if link else "",
-                image_url=image_url if image_url else "",
-            )
-            if link:
-                yield response.follow(
-                    link,
-                    callback=self.parse_opportunity,
-                    meta={
-                        "item": item,
-                        "playwright": True,
-                        "playwright_include_page": True,
-                    },
+    async def start(self):
+        url = self.start_urls[0]
+        meta = self._get_playwright_meta()
+        yield scrapy.Request(url, callback=self.parse, meta=meta)
+
+    async def parse(self, response):
+        page = response.meta["playwright_page"]
+
+        # Process all items on the current page
+        cards = await page.query_selector_all("div.relative.rounded-lg.overflow-hidden.shadow-lg.group")
+        for card in cards:
+            link = await card.query_selector("a.absolute.inset-0.z-30")
+            link_url = await link.get_attribute("href") if link else None
+
+            if link_url:
+                title_el = await card.query_selector("h3.text-white")
+                title = await title_el.inner_text() if title_el else ""
+
+                deadline_el = await card.query_selector("div.absolute.top-4 div.text-lg")
+                deadline_text = await deadline_el.inner_text() if deadline_el else ""
+                closing_date_match = scrapy.Selector(text=deadline_text).re_first(r"Deadline:\s*(.*)")
+
+                img_el = await card.query_selector("img")
+                image_url = await img_el.get_attribute("src") if img_el else ""
+
+                item = EurekaItem(
+                    title=title.strip(),
+                    closing_date=closing_date_match.strip() if closing_date_match else "",
+                    link=response.urljoin(link_url),
+                    image_url=image_url,
                 )
-            else:
-                yield item
+                meta = self._get_playwright_meta()
+                meta["item"] = item
+                yield response.follow(link_url, callback=self.parse_opportunity, meta=meta)
 
         # Pagination
-        next_page = response.css("a.next.page-numbers::attr(href)").get()
-        if next_page:
-            yield scrapy.Request(
-                response.urljoin(next_page),
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                    "playwright_context_kwargs": {"ignore_https_errors": True},
-                },
-                callback=self.parse,
-            )
+        next_page_link = await page.query_selector("a.next.page-numbers")
+        if next_page_link:
+            next_page_url = await next_page_link.get_attribute("href")
+            await page.close()  # Explicitly close the current page
+            yield scrapy.Request(response.urljoin(next_page_url), callback=self.parse, meta=self._get_playwright_meta())
 
     def parse_opportunity(self, response):
         item = response.meta["item"]
