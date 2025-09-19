@@ -20,15 +20,11 @@ class EurekaSpider(scrapy.Spider):
         },
     }
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield scrapy.Request(
                 url,
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                    "playwright_context_kwargs": {"ignore_https_errors": True},
-                },
+                meta={"playwright": True, "playwright_include_page": True},
                 callback=self.parse,
             )
 
@@ -62,14 +58,9 @@ class EurekaSpider(scrapy.Spider):
         # Pagination
         next_page = response.css("a.next.page-numbers::attr(href)").get()
         if next_page:
+            yield scrapy.Request(next_page, callback=self.parse)
             yield scrapy.Request(
-                next_page,
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                    "playwright_context_kwargs": {"ignore_https_errors": True},
-                },
-                callback=self.parse,
+                response.urljoin(next_page), callback=self.parse, meta={"playwright": True}
             )
 
     def parse_opportunity(self, response):
@@ -95,6 +86,7 @@ class EurekaSpider(scrapy.Spider):
                 "//div[contains(@class,'bg-white')]//div[contains(@class,'flex')][2]//p[contains(@class,'ml-2')]/text()"
             ).get()
         item["opening_date"] = apply_from.strip() if apply_from else None
+        item["closing_date"] = apply_until.strip() if apply_until else None
 
         # Description (first block after the title)
         description = response.css("div.font-inconsolata.mt-6").xpath("string()").get()
