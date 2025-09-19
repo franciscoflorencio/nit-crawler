@@ -20,21 +20,25 @@ class EurekaSpider(scrapy.Spider):
         },
     }
 
-    async def start(self):
+    def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(
                 url,
-                meta={"playwright": True, "playwright_include_page": True},
+                meta={
+                    "playwright": True,
+                    "playwright_include_page": True,
+                    "playwright_context_kwargs": {"ignore_https_errors": True},
+                },
                 callback=self.parse,
             )
 
     def parse(self, response):
-        for card in response.css("div.bg-white.group"):
-            link = card.css("a.h-full.flex.flex-col::attr(href)").get()
-            title = card.css("h2.heading-md.mt-3::text").get()
+        for card in response.css("div.relative.rounded-lg.overflow-hidden.shadow-lg.group"):
+            link = card.css("a.absolute.inset-0.z-30::attr(href)").get()
+            title = card.css("h3.text-white::text").get()
             closing_date = card.css(
-                "div.flex.items-center.justify-end.font-inconsolata.text-xs.font-bold::text"
-            ).re_first(r"Deadline\s*(.*)")
+                "div.absolute.top-4 div.text-lg::text"
+            ).re_first(r"Deadline:\s*(.*)")
             image_url = card.css("img::attr(src)").get()
             item = EurekaItem(
                 title=title.strip() if title else "",
@@ -58,9 +62,14 @@ class EurekaSpider(scrapy.Spider):
         # Pagination
         next_page = response.css("a.next.page-numbers::attr(href)").get()
         if next_page:
-            yield scrapy.Request(next_page, callback=self.parse)
             yield scrapy.Request(
-                response.urljoin(next_page), callback=self.parse, meta={"playwright": True}
+                response.urljoin(next_page),
+                meta={
+                    "playwright": True,
+                    "playwright_include_page": True,
+                    "playwright_context_kwargs": {"ignore_https_errors": True},
+                },
+                callback=self.parse,
             )
 
     def parse_opportunity(self, response):
@@ -86,7 +95,6 @@ class EurekaSpider(scrapy.Spider):
                 "//div[contains(@class,'bg-white')]//div[contains(@class,'flex')][2]//p[contains(@class,'ml-2')]/text()"
             ).get()
         item["opening_date"] = apply_from.strip() if apply_from else None
-        item["closing_date"] = apply_until.strip() if apply_until else None
 
         # Description (first block after the title)
         description = response.css("div.font-inconsolata.mt-6").xpath("string()").get()
