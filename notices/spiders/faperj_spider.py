@@ -41,20 +41,21 @@ class FaperjSpider(scrapy.Spider):
             # Extrai todo o texto do parágrafo (já limpo)
             all_text = " ".join(temp_selector.css("::text").getall())
 
-            # Procura pela linha de submissão
-            submission_match = re.search(r"Submissão de propostas on-line:? de (.*?)(?=<br>|Lançamento|$)", all_text, re.IGNORECASE)
-            
-            opening_date = None
-            closing_date = None
 
+            # Extrai opening_date (Lançamento do programa ou edital)
+            opening_match = re.search(r"Lan[çc]amento (?:do programa|do edital|da chamada|do Edital)[:]?\s*(\d{2}/\d{2}/\d{4})", all_text, re.IGNORECASE)
+            opening_date = opening_match.group(1) if opening_match else None
+
+            # Extrai closing_date (última data válida de submissão)
+            # Aceita variações: 'Submissão de propostas on-line', 'Submissão das propostas on-line', 'Submissão de Propostas on-line', etc.
+            submission_regex = r"Submiss[aã]o (?:de|das)? propostas? on-line:?[^\d]*(.*)"
+            submission_match = re.search(submission_regex, all_text, re.IGNORECASE)
+            closing_date = None
             if submission_match:
-                # Pega todas as datas encontradas na linha de submissão
+                # Extrai todas as datas válidas
                 dates = date_pattern.findall(submission_match.group(1))
-                if len(dates) >= 2:
-                    opening_date = dates[0]
-                    closing_date = dates[-1] # Pega a última data como data de fechamento
-                elif len(dates) == 1:
-                    opening_date = dates[0]
+                if dates:
+                    closing_date = dates[-1]  # Pega a última data válida
 
             # Populate the item with title, description, and link
             item = FaperjItem()
