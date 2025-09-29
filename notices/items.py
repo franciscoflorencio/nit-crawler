@@ -25,6 +25,8 @@ class FaperjItem(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
+    opening_date = scrapy.Field()
+    closing_date = scrapy.Field()
 
 
 class UkriItem(scrapy.Item):
