@@ -59,15 +59,22 @@ class EurekaSpider(scrapy.Spider):
                 title = await title_el.inner_text() if title_el else ""
 
                 deadline_el = await card.query_selector("div.absolute.top-4 div.text-lg")
-                deadline_text = await deadline_el.inner_text() if deadline_el else ""
-                closing_date_match = scrapy.Selector(text=deadline_text).re_first(r"Deadline:\s*(.*)")
+                deadline_text = await deadline_el.inner_html() if deadline_el else ""
+                # Remove tags HTML e espaços extras
+                import re
+                deadline_text_clean = re.sub(r'<[^>]+>', '', deadline_text)
+                closing_date_match = scrapy.Selector(text=deadline_text_clean).re_first(r"Deadline:\s*([\w\s,]+\d{4})")
+                if closing_date_match:
+                    closing_date_clean = closing_date_match.strip()
+                else:
+                    closing_date_clean = ""
 
                 img_el = await card.query_selector("img")
                 image_url = await img_el.get_attribute("src") if img_el else ""
 
                 item = EurekaItem(
                     title=title.strip(),
-                    closing_date=closing_date_match.strip() if closing_date_match else "",
+                    closing_date=closing_date_clean,
                     link=response.urljoin(link_url),
                     image_url=image_url,
                 )
@@ -89,26 +96,23 @@ class EurekaSpider(scrapy.Spider):
         if title:
             item["title"] = title.strip()
 
-        apply_from = response.xpath(
-            "//p[contains(text(), 'Apply from')]/following-sibling::p[1]/text()"
-        ).get()
-        apply_until = response.xpath(
-            "//p[contains(text(), 'Until')]/following-sibling::p[1]/text()"
-        ).get()
-        if not apply_from:
-            # fallback for structure seen in screenshot
-            apply_from = response.xpath(
-                "//div[contains(@class,'bg-white')]//div[contains(@class,'flex')][1]//p[contains(@class,'ml-2')]/text()"
-            ).get()
-        if not apply_until:
-            apply_until = response.xpath(
-                "//div[contains(@class,'bg-white')]//div[contains(@class,'flex')][2]//p[contains(@class,'ml-2')]/text()"
-            ).get()
-        item["opening_date"] = apply_from.strip() if apply_from else None
 
-        # Description (first block after the title)
-        description = response.css("div.font-inconsolata.mt-6").xpath("string()").get()
-        item["description"] = description.strip() if description else None
+        # Extrai opening_date do bloco 'Start Date'
+        opening_date_html = response.css("div.inconsolata-200:contains('Start Date')").get()
+        import re
+        opening_date_match = None
+        if opening_date_html:
+            opening_date_match = re.search(r'Start Date:</span>\s*([^<]+)', opening_date_html)
+        item["opening_date"] = opening_date_match.group(1).strip() if opening_date_match else None
+
+        # Extrai description do bloco 'div.space-y-4.text-lg#about'
+        about_html = response.css("div.space-y-4.text-lg#about").get()
+        if about_html:
+            # Remove tags HTML e pega só o texto
+            about_text = re.sub(r'<[^>]+>', '', about_html)
+            item["description"] = about_text.strip()
+        else:
+            item["description"] = None
 
         # Countries
         countries = response.css(
