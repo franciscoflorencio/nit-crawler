@@ -1,4 +1,6 @@
 import scrapy
+import re
+from datetime import datetime
 from notices.items import UkriItem
 
 
@@ -103,30 +105,62 @@ class UkriSpider(scrapy.Spider):
                 .get("")
                 .strip()
             )
-            ukri_item["opening_date"] = (
-                opportunity.css(
-                    'div.govuk-table__row:contains("Opening date:") time::text'
-                )
-                .get("")
-                .strip()
-                or opportunity.css(
-                    'div.govuk-table__row:contains("Opening date:") dd.govuk-table__cell::text'
-                )
-                .get("")
-                .strip()
+
+            # Helper to normalize English date strings to dd/mm/YYYY
+            def normalize_date(date_str):
+                if not date_str:
+                    return None
+                s = re.sub(r"<[^>]+>", "", date_str).strip()
+                # Try 'MonthName D, YYYY' e.g. 'October 7, 2025' (optionally followed by time)
+                m = re.search(r"([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})", s)
+                if m:
+                    month_name, day, year = m.group(1), m.group(2), m.group(3)
+                else:
+                    # Try 'D MonthName YYYY' e.g. '12 June 2025'
+                    m = re.search(r"(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})", s)
+                    if m:
+                        day, month_name, year = m.group(1), m.group(2), m.group(3)
+                    else:
+                        return None
+                # Map month name to number
+                try:
+                    try:
+                        month = datetime.strptime(month_name, "%B").month
+                    except ValueError:
+                        month = datetime.strptime(month_name, "%b").month
+                except Exception:
+                    months = {
+                        'january':1,'jan':1,'february':2,'feb':2,'march':3,'mar':3,'april':4,'apr':4,
+                        'may':5,'june':6,'jun':6,'july':7,'jul':7,'august':8,'aug':8,'september':9,'sep':9,
+                        'october':10,'oct':10,'november':11,'nov':11,'december':12,'dec':12
+                    }
+                    month = months.get(month_name.lower())
+                    if not month:
+                        return None
+                try:
+                    d = int(day)
+                    y = int(year)
+                    return f"{d:02d}/{month:02d}/{y}"
+                except Exception:
+                    return None
+
+            opening_raw = (
+                opportunity.css('div.govuk-table__row:contains("Opening date:") time::text').get("")
+                or opportunity.css('div.govuk-table__row:contains("Opening date:") dd.govuk-table__cell::text').get("")
             )
-            ukri_item["closing_date"] = (
-                opportunity.css(
-                    'div.govuk-table__row:contains("Closing date:") time::text'
-                )
-                .get("")
-                .strip()
-                or opportunity.css(
-                    'div.govuk-table__row:contains("Closing date:") dd.govuk-table__cell::text'
-                )
-                .get("")
-                .strip()
+            closing_raw = (
+                opportunity.css('div.govuk-table__row:contains("Closing date:") time::text').get("")
+                or opportunity.css('div.govuk-table__row:contains("Closing date:") dd.govuk-table__cell::text').get("")
             )
+
+            opening_raw = opening_raw.strip() if opening_raw else ""
+            closing_raw = closing_raw.strip() if closing_raw else ""
+
+            opening_norm = normalize_date(opening_raw)
+            closing_norm = normalize_date(closing_raw)
+
+            ukri_item["opening_date"] = opening_norm if opening_norm else (opening_raw or None)
+            ukri_item["closing_date"] = closing_norm if closing_norm else (closing_raw or None)
 
             yield ukri_item
 
