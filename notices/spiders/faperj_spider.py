@@ -23,6 +23,9 @@ class FaperjSpider(scrapy.Spider):
         # Regex para encontrar datas no formato dd/mm/yyyy
         date_pattern = re.compile(r"\d{2}/\d{2}/\d{4}")
 
+        notices = response.css("div.post-content p:has(a)")
+        self.logger.info(f"Found {len(notices)} potential notices.")
+
         for notice in notices:
             # Extract the first link (title and URL)
             title = notice.css("strong a::text").get()
