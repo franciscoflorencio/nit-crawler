@@ -29,6 +29,7 @@ class MarieCurieSpider(scrapy.Spider):
             item['closing_date'] = funding.get('deadlineDate', 'No deadline day')
             item['closing_time'] = funding.get('deadlineTime', 'No deadline time')
             item['link'] = response.urljoin(funding.get('url', 'No link'))
+            item['country'] = 'União Europeia'
             yield item
 
         # Pagination handling
