@@ -25,7 +25,7 @@ class FinepSpider(scrapy.Spider):
         if next_page:
             next_page_url = response.urljoin(next_page)
             yield scrapy.Request(url=next_page_url, callback=self.parse)
-            
+
     def parse_details(self, response):
         # Extract data from the individual page
         title = response.css("h2.tit_pag a::text").get()
@@ -39,5 +39,6 @@ class FinepSpider(scrapy.Spider):
             description=description,
             opening_date=date,
             closing_date=closing_date,
-            link=response.url
+            link=response.url,
+            country="Brasil"
         )

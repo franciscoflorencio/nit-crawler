@@ -42,6 +42,7 @@ class CnpqSpider(scrapy.Spider):
             item['opening_date'] = dates[0]
             item['closing_date'] = dates[1]
             item['link'] = row_fluid.css('a.btn')[i].attrib['href'] if i < len(row_fluid.css('a.btn')) else ''
+            item['country'] = "Brasil"
             yield item
 
         current_items_count = len(notices)
@@ -50,5 +51,5 @@ class CnpqSpider(scrapy.Spider):
         if next_page_start < total_notices:
             next_page_number = (next_page_start // items_per_page) + 1
             next_page_url = f"http://memoria2.cnpq.br/web/guest/chamadas-publicas?p_p_id=chamada_WAR_chamadasportlet&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_chamada_WAR_chamadasportlet_keywords=&_chamada_WAR_chamadasportlet_delta={items_per_page}&_chamada_WAR_chamadasportlet_advancedSearch=false&_chamada_WAR_chamadasportlet_andOperator=true&_chamada_WAR_chamadasportlet_resetCur=false&_chamada_WAR_chamadasportlet_cur={next_page_number}"
-            
+
             yield scrapy.Request(next_page_url, callback=self.parse)
