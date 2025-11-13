@@ -33,31 +33,31 @@ class AnrSpider(scrapy.Spider):
 
     def parse(self, response):
         accordion = response.css('div.accordion.accordion--search')
-        
+
         for opportunity in accordion.css('div.card.appel'):
 
             date_div = opportunity.css('div.date.my-2::text').getall()
             compound_date = ''.join([date.strip() for date in date_div if date.strip()])
             split_date = compound_date.split('-')
-            
+
             if len(split_date) >= 2:
                 opening_date = split_date[0].strip()
                 closing_date = split_date[1].strip()
             else:
                 opening_date = compound_date
                 closing_date = None
-            
+
             anr_item = AnrItem()
-            
+
             anr_item['observation'] = opportunity.css('span.tag-type::text').get().strip()
             anr_item['opening_date'] = opening_date
             anr_item['closing_date'] = closing_date
             anr_item['title'] = opportunity.css('h2 a::text').get().strip()
             anr_item['description'] = opportunity.css('p::text').get().strip()
             anr_item['link'] = response.urljoin(opportunity.css('h2 a::attr(href)').get())
-            
+            anr_item['country'] = "França"
             yield anr_item
-        
+
         # Handle pagination
         next_page = response.css('ul.pagination li.page-item:not(.active) a.page-link-next::attr(href)').get()
         if next_page:

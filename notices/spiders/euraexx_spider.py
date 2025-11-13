@@ -1,7 +1,7 @@
 import scrapy
 import re
 from datetime import datetime
-from notices.items import EuraexxItem 
+from notices.items import EuraexxItem
 
 class EuraexxSpider(scrapy.Spider):
     name = "euraexx"
@@ -33,7 +33,7 @@ class EuraexxSpider(scrapy.Spider):
     def parse(self, response):
         # Extract all job postings
         results = response.xpath("//article[@class='ecl-content-item']")
-        self.logger.info(f"Found {len(results)} results on this page") 
+        self.logger.info(f"Found {len(results)} results on this page")
 
         for result in results:
             # Extract title
@@ -117,6 +117,7 @@ class EuraexxSpider(scrapy.Spider):
                 opening_date=opening_date,
                 closing_date=closing_date,
             )
+            item['country'] = 'União Europeia'
             yield item
 
         # Pagination: follow the actual 'next' link href to avoid constructing URLs that may loop

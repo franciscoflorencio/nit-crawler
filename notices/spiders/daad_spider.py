@@ -1,5 +1,5 @@
 import scrapy
-from notices.items import DaadItem  # Ensure DaadItem is defined in notices.items
+from notices.items import DaadItem
 
 
 class DaadSpider(scrapy.Spider):
@@ -18,7 +18,6 @@ class DaadSpider(scrapy.Spider):
     def parse(self, response):
         self.logger.info(f"Parsing page: {response.url}")
 
-        # This XPath was confirmed to find 10 opportunities in your logs
         opportunities_xpath_original = (
             "/html/body/div[2]/div[1]/div/main/section[1]/ul/li"
         )
@@ -29,7 +28,6 @@ class DaadSpider(scrapy.Spider):
         )
 
         if not opportunities_list:
-            # Fallback if the original XPath fails in the future
             opportunities_xpath_general = "//main//section//ul/li"
             self.logger.info(
                 "Original XPath found 0 opportunities. Trying general XPath."
@@ -46,20 +44,13 @@ class DaadSpider(scrapy.Spider):
             self.logger.warning(
                 "Consider inspecting the page structure manually or using 'scrapy shell' with Playwright to test selectors."
             )
-            # You can uncomment the following lines to save the page HTML for offline debugging if needed
-            # body = response.body.decode(response.encoding)
-            # with open(f"debug_page_{response.url.split('/')[-2] or 'index'}.html", "w", encoding=response.encoding) as f:
-            #    f.write(body)
-            # self.logger.info(f"Saved debug HTML for {response.url}")
 
         for i, opportunity in enumerate(opportunities_list):
-            # Log the HTML of the first item to help debug its internal selectors
             if i == 0:
                 self.logger.info(
                     f"Processing first opportunity element. HTML snippet: {opportunity.get()[:500]}"
                 )
 
-            # Corrected: Target h2 for title based on your log's HTML snippet
             title_text_h2_a = opportunity.css("h2 a::text").get()
             title_text_h2_direct = opportunity.css("h2::text").get()
 
@@ -69,7 +60,7 @@ class DaadSpider(scrapy.Spider):
             elif title_text_h2_direct and title_text_h2_direct.strip():
                 title_text = title_text_h2_direct.strip()
 
-            if i == 0:  # More logging for the first item's title extraction
+            if i == 0:
                 self.logger.info(
                     f"First item - title from 'h2 a::text': '{title_text_h2_a}'"
                 )
@@ -80,7 +71,7 @@ class DaadSpider(scrapy.Spider):
 
             if (
                 not title_text
-            ):  # Check if title_text is None or empty string after stripping
+            ):
                 if i == 0:
                     self.logger.warning(
                         "Skipping first opportunity because no valid title was extracted (using h2 selectors). Check its HTML and title selectors."
@@ -90,12 +81,7 @@ class DaadSpider(scrapy.Spider):
             daad_item = DaadItem()
             daad_item["title"] = title_text
 
-            # Link extraction:
-            # Often, the entire teaser item or its h2 is wrapped in an <a> tag.
             link_url = None
-            # Try to get link from an <a> tag that is a direct child of the opportunity <li> itself
-            # or from an <a> tag that is a child of the .c-list-teaser div
-            # This handles cases where the whole block is clickable.
             possible_wrapper_link = opportunity.css(
                 "a::attr(href)"
             ).get()  # Most direct child a
@@ -105,24 +91,19 @@ class DaadSpider(scrapy.Spider):
 
             if (
                 possible_wrapper_link
-            ):  # Check if the <li> itself might be wrapped or contain a primary link
-                # Check if this link is directly associated with the h2 or is a general wrapper
-                h2_link_test = opportunity.xpath(
-                    "./a[h2]/@href"
-                ).get()  # <a> that has an <h2> child
+            ):
+                h2_link_test = opportunity.xpath("./a[h2]/@href").get()
                 if h2_link_test:
                     link_url = h2_link_test
-                elif opportunity.xpath(
-                    "./a[.//h2]/@href"
-                ).get():  # <a> that has an <h2> descendant
+                elif opportunity.xpath("./a[.//h2]/@href").get():
                     link_url = opportunity.xpath("./a[.//h2]/@href").get()
-                else:  # If not specifically for h2, check if it's a simple wrapper
+                else:
                     link_url = possible_wrapper_link
 
             if not link_url and link_from_teaser_div:
                 link_url = link_from_teaser_div
 
-            if not link_url:  # Fallback to link specifically inside h2
+            if not link_url:
                 link_url = opportunity.css("h2 a::attr(href)").get()
 
             daad_item["link"] = response.urljoin(link_url) if link_url else None
@@ -136,7 +117,6 @@ class DaadSpider(scrapy.Spider):
             all_paragraphs = opportunity.css("p")
             for p_element in all_paragraphs:
                 p_class_attr = p_element.attrib.get("class", "")
-                # Ensure it's not 'u-size-teaser' (already captured) and also not 'u-dateline' (usually metadata)
                 if (
                     "u-size-teaser" not in p_class_attr.split()
                     and "u-dateline" not in p_class_attr.split()
@@ -144,20 +124,19 @@ class DaadSpider(scrapy.Spider):
                     current_p_text_list = p_element.css("::text").getall()
                     current_p_text = "".join(current_p_text_list).strip()
                     if current_p_text:
-                        # Basic check to ensure it's not the same as description if description was found
                         if (
                             daad_item["description"]
                             and current_p_text == daad_item["description"]
                         ):
                             continue
                         observation_text = current_p_text
-                        break  # Take the first such paragraph as observation
+                        break
             daad_item["observation"] = observation_text
+            daad_item['country'] = 'Alemanha'
 
             self.logger.info(f"Yielding item: {daad_item}")
             yield daad_item
 
-        # Pagination
         pagination_option_values = response.css(
             "select#pagination option::attr(value)"
         ).getall()

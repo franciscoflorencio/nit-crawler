@@ -23,6 +23,9 @@ class FaperjSpider(scrapy.Spider):
         # Regex para encontrar datas no formato dd/mm/yyyy
         date_pattern = re.compile(r"\d{2}/\d{2}/\d{4}")
 
+        notices = response.css("div.post-content p:has(a)")
+        self.logger.info(f"Found {len(notices)} potential notices.")
+
         for notice in notices:
             # Extract the first link (title and URL)
             title = notice.css("strong a::text").get()
@@ -37,7 +40,7 @@ class FaperjSpider(scrapy.Spider):
             # Remove tags de texto riscado para não capturar datas antigas
             cleaned_html = re.sub(r'<span style="text-decoration: line-through;">.*?</span>', '', notice_html, flags=re.DOTALL)
             temp_selector = scrapy.Selector(text=cleaned_html)
-            
+
             # Extrai todo o texto do parágrafo (já limpo)
             all_text = " ".join(temp_selector.css("::text").getall())
 
@@ -65,5 +68,6 @@ class FaperjSpider(scrapy.Spider):
             item["link"] = response.urljoin(link)  # Convert relative URLs to absolute
             item["opening_date"] = opening_date
             item["closing_date"] = closing_date
+            item["country"] = "Brasil"
 
             yield item

@@ -133,5 +133,6 @@ class EurekaSpider(scrapy.Spider):
         item["scope"] = get_section("scope")
         item["timeframe"] = get_section("timeframe")
         item["funding_details"] = get_section("funding-details")
+        item['country'] = 'mundo'
 
         yield item

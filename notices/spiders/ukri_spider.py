@@ -161,6 +161,7 @@ class UkriSpider(scrapy.Spider):
 
             ukri_item["opening_date"] = opening_norm if opening_norm else (opening_raw or None)
             ukri_item["closing_date"] = closing_norm if closing_norm else (closing_raw or None)
+            ukri_item['country'] = 'Reino Unido'
 
             yield ukri_item
 
