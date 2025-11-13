@@ -12,6 +12,7 @@ class CnpqItem(scrapy.Item):
     opening_date = scrapy.Field()
     closing_date = scrapy.Field()
     link = scrapy.Field()
+    country = scrapy.Field()
 
 
 class EacItem(scrapy.Item):
@@ -19,6 +20,7 @@ class EacItem(scrapy.Item):
     closing_date = scrapy.Field()
     closing_time = scrapy.Field()
     link = scrapy.Field()
+    country = scrapy.Field()
 
 
 class FaperjItem(scrapy.Item):
@@ -27,6 +29,7 @@ class FaperjItem(scrapy.Item):
     link = scrapy.Field()
     opening_date = scrapy.Field()
     closing_date = scrapy.Field()
+    country = scrapy.Field()
 
 
 class UkriItem(scrapy.Item):
@@ -41,6 +44,7 @@ class UkriItem(scrapy.Item):
     publication_date = scrapy.Field()
     opening_date = scrapy.Field()
     closing_date = scrapy.Field()
+    country = scrapy.Field()
 
 
 class DaadItem(scrapy.Item):
@@ -48,6 +52,7 @@ class DaadItem(scrapy.Item):
     observation = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
+    country = scrapy.Field()
 
 
 class FinepItem(scrapy.Item):
@@ -56,6 +61,7 @@ class FinepItem(scrapy.Item):
     link = scrapy.Field()
     closing_date = scrapy.Field()
     opening_date = scrapy.Field()
+    country = scrapy.Field()
 
 
 class EuraexxItem(scrapy.Item):
@@ -65,6 +71,7 @@ class EuraexxItem(scrapy.Item):
     closing_date = scrapy.Field()
     opening_date = scrapy.Field()
     date = scrapy.Field()
+    country = scrapy.Field()
 
 
 class FapespItem(scrapy.Item):
@@ -74,6 +81,7 @@ class FapespItem(scrapy.Item):
     closing_date = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
+    country = scrapy.Field()
 
 
 class AnrItem(scrapy.Item):
@@ -83,6 +91,7 @@ class AnrItem(scrapy.Item):
     closing_date = scrapy.Field()
     link = scrapy.Field()
     description = scrapy.Field()
+    country = scrapy.Field()
 
 
 class EurekaItem(scrapy.Item):
@@ -97,3 +106,4 @@ class EurekaItem(scrapy.Item):
     timeframe = scrapy.Field()
     funding_details = scrapy.Field()
     status = scrapy.Field()
+    country = scrapy.Field()
