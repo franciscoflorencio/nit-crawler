@@ -49,6 +49,9 @@ class FaperjPipeline:
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
 
+        # Parse the current date
+        current_date = datetime.now().date()
+
         # Ensure the title field exists
         if "title" not in adapter.field_names():
             spider.logger.warning(f"Item dropped due to missing title: {item}")
@@ -67,6 +70,12 @@ class FaperjPipeline:
         if not link.startswith("http"):
             spider.logger.info(f"Item dropped due to invalid link: {link}")
             raise DropItem(f"Item dropped because link is not a valid URL: {link}")
+
+        # Check if the 'deadline' field exists and is still valid
+        if "closing_date" in item and item["closing_date"]:
+            closing_date = datetime.strptime(item["closing_date"], "%d/%m/%Y")
+            if closing_date < current_date:  # Deadline has passed
+                print("pipeline error!!")
 
         # Return the item if it passes validation
         return item
@@ -91,9 +100,9 @@ class FinepPipeline:
                 )
 
         # Check if the 'deadline' field exists and is still valid
-        if "deadline" in item and item["deadline"]:
-            item_deadline = datetime.strptime(item["deadline"], "%d/%m/%Y")
-            if item_deadline < current_date:  # Deadline has passed
+        if "closing_date" in item and item["closing_date"]:
+            closing_date = datetime.strptime(item["closing_date"], "%d/%m/%Y")
+            if closing_date < current_date:  # Deadline has passed
                 print("pipeline error!!")
 
         # If the item passes the check, return it for saving
