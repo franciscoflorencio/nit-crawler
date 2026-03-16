@@ -33,19 +33,11 @@ custom_settings = {
 }
 
 ITEM_PIPELINES = {
-    # I see you have duplicate items in your anr_opportunities.json.
-    # You can create and enable a pipeline to remove duplicates.
-    # "notices.pipelines.DuplicatesPipeline": 300,
 }
 
 # Set settings whose default value is deprecated to a future-proof value
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
-
-# --- Feed Exports (Default JSON output) ---
-# This configures a default output location for all spiders.
-# When you run `scrapy crawl <spider_name>`, the output will be saved
-# automatically without needing the -o flag.
 
 # The root directory of your Scrapy project (nit-crawler/)
 BASE_DIR = Path(__file__).resolve().parent.parent
