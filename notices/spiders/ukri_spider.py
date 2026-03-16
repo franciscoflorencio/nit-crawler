@@ -19,11 +19,11 @@ class UkriSpider(scrapy.Spider):
         yield scrapy.Request(url, meta={"playwright": True})
 
     def parse(self, response):
-        # lida com paginacao
+        # Handle pagination
         for page in response.css("a.page-numbers").get():
             yield response.follow(page, self.parse)
 
-        # pega as oportunidades
+        # Extract opportunities
         for opportunity in response.css('div[id^="post-"]'):
             ukri_item = UkriItem()
 
@@ -97,7 +97,7 @@ class UkriSpider(scrapy.Spider):
                 elif max_award:
                     ukri_item["award_range"] = f"Max: {max_award}"
 
-            # Extrair datas
+            # Extract dates
             ukri_item["publication_date"] = (
                 opportunity.css(
                     'div.govuk-table__row:contains("Publication date:") dd.govuk-table__cell::text'

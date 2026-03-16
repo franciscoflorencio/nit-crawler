@@ -60,7 +60,7 @@ class EurekaSpider(scrapy.Spider):
 
                 deadline_el = await card.query_selector("div.absolute.top-4 div.text-lg")
                 deadline_text = await deadline_el.inner_html() if deadline_el else ""
-                # Remove tags HTML e espaços extras
+                # Remove HTML tags and extra spaces
                 import re
                 deadline_text_clean = re.sub(r'<[^>]+>', '', deadline_text)
                 closing_date_match = scrapy.Selector(text=deadline_text_clean).re_first(r"Deadline:\s*([\w\s,]+\d{4})")
@@ -97,7 +97,7 @@ class EurekaSpider(scrapy.Spider):
             item["title"] = title.strip()
 
 
-        # Extrai opening_date do bloco 'Start Date'
+        # Extract opening_date from 'Start Date' block
         opening_date_html = response.css("div.inconsolata-200:contains('Start Date')").get()
         import re
         opening_date_match = None
@@ -105,10 +105,10 @@ class EurekaSpider(scrapy.Spider):
             opening_date_match = re.search(r'Start Date:</span>\s*([^<]+)', opening_date_html)
         item["opening_date"] = opening_date_match.group(1).strip() if opening_date_match else None
 
-        # Extrai description do bloco 'div.space-y-4.text-lg#about'
+        # Extract description from about block
         about_html = response.css("div.space-y-4.text-lg#about").get()
         if about_html:
-            # Remove tags HTML e pega só o texto
+            # Remove HTML tags and get text only
             about_text = re.sub(r'<[^>]+>', '', about_html)
             item["description"] = about_text.strip()
         else:

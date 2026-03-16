@@ -27,7 +27,6 @@ class EramusSpider(scrapy.Spider):
         data = json.loads(response.text)
         fundings = data.get('data', [])
 
-        # Yield items
         for funding in fundings:
             item = EacItem()
             item['title'] = funding.get('title', 'No title')

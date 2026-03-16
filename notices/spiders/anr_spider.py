@@ -8,7 +8,7 @@ class AnrSpider(scrapy.Spider):
     start_urls = ["https://anr.fr/en/open-calls-and-preannouncements/"]
 
     custom_settings = {
-        "PLAYWRIGHT_BROWSER_TYPE": "firefox",  # Changed from chromium to firefox
+        "PLAYWRIGHT_BROWSER_TYPE": "firefox",
         "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "ROBOTSTXT_OBEY": False,
         "DOWNLOAD_HANDLERS": {
@@ -58,7 +58,6 @@ class AnrSpider(scrapy.Spider):
             anr_item['country'] = "França"
             yield anr_item
 
-        # Handle pagination
         next_page = response.css('ul.pagination li.page-item:not(.active) a.page-link-next::attr(href)').get()
         if next_page:
             next_page_url = response.urljoin(next_page)

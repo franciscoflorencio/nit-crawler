@@ -23,15 +23,15 @@ class FaperjSpider(scrapy.Spider):
 			yield scrapy.Request(url, meta={"playwright": True})
 
 	def parse(self, response):
-		# Regex para encontrar datas no formato dd/mm/yyyy
+		# Regex to find dates in dd/mm/yyyy format
 		date_pattern = re.compile(r"d{2}/d{2}/d{4}")
 
-		# Seleciona todos os parágrafos dentro da área de conteúdo principal
+		# Select all paragraphs within the main content area
 		paragraphs = response.css("section.corpo-interna p")
 		self.logger.info(f"Found {len(paragraphs)} paragraphs to process.")
 
 		for p in paragraphs:
-			# Remove tags de texto riscado para não capturar datas antigas
+			# Remove strikethrough text to avoid capturing old dates
 			p_html = p.get()
 			cleaned_html = re.sub(
 				r'<span style="text-decoration: line-through;">.*?</span>',
@@ -40,7 +40,7 @@ class FaperjSpider(scrapy.Spider):
 				flags=re.DOTALL,
 			)
 
-			# Um parágrafo pode conter múltiplos editais, então procuramos por todos os links em negrito
+			# A paragraph may contain multiple notices, so search for all bold links
 			notice_links = scrapy.Selector(text=cleaned_html).css(
 				'strong > a[href*="downloads/Edital"]'
 			)
@@ -48,7 +48,7 @@ class FaperjSpider(scrapy.Spider):
 			if not notice_links:
 				continue
 
-			# O texto completo do parágrafo (limpo) será usado para encontrar as datas
+			# Full cleaned paragraph text is used to find dates
 			all_text = " ".join(
 				scrapy.Selector(text=cleaned_html).xpath(".//text()").getall()
 			)
@@ -60,7 +60,7 @@ class FaperjSpider(scrapy.Spider):
 				if not title or not link:
 					continue
 
-				# Extrai opening_date (Lançamento do programa ou edital)
+				# Extract opening date
 				opening_match = re.search(
 					r"Lan[çc]amento (?:do programa|do edital|da chamada|do Edital)[:]?s*(d{2}/d{2}/d{4})",
 					all_text,
@@ -68,7 +68,7 @@ class FaperjSpider(scrapy.Spider):
 				)
 				opening_date = opening_match.group(1) if opening_match else None
 
-				# Extrai closing_date (última data válida de submissão)
+				# Extract closing date
 				submission_regex = (
 					r"Submiss[aã]o (?:de|das)? propostas? on-line:?[^d]*(.*)"
 				)
@@ -82,7 +82,6 @@ class FaperjSpider(scrapy.Spider):
 					if dates:
 						closing_date = dates[-1]
 
-				# Popula o item
 				item = FaperjItem()
 				item["title"] = title.strip()
 				item["description"] = " ".join(all_text.split())

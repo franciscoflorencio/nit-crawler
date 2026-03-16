@@ -12,7 +12,7 @@ class CnpqSpider(scrapy.Spider):
     start_urls = ["http://memoria2.cnpq.br/web/guest/chamadas-publicas"]
 
     def parse(self, response):
-        #this is for pagination
+        # Pagination details
         results = response.css('li.resultSearch::text').get()
         parts = results.split()
         total_notices = int(parts[3])
@@ -38,7 +38,6 @@ class CnpqSpider(scrapy.Spider):
             inscriptions = notice.css('div.inscricao li::text').getall()
             # Join all inscription deadlines if needed
             item['closing_date'] = ' '.join(inscriptions).strip()
-            # Get link (same approach)
             item['opening_date'] = dates[0]
             item['closing_date'] = dates[1]
             item['link'] = row_fluid.css('a.btn')[i].attrib['href'] if i < len(row_fluid.css('a.btn')) else ''

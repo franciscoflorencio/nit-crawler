@@ -31,7 +31,6 @@ class FinepSpider(scrapy.Spider):
         date = response.xpath("//div[contains(., 'Data de Publicação:')]/following-sibling::div[@class='text']/text()").get()
         closing_date = response.xpath("//div[contains(., 'Prazo para envio de propostas até:')]/following-sibling::div[@class='text']/text()").get()
 
-        # Create and yield the item
         yield FinepItem(
             title=title,
             description=description,
