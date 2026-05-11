@@ -1,5 +1,6 @@
 import scrapy
 import json
+from datetime import datetime
 from notices.items import EacItem
 
 
@@ -27,10 +28,27 @@ class EramusSpider(scrapy.Spider):
         data = json.loads(response.text)
         fundings = data.get('data', [])
 
+        current_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
         for funding in fundings:
+            closing_date = funding.get('deadlineDate', 'No deadline day')
+
+            if closing_date != 'No deadline day':
+                parsed_date = None
+                for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d %b %Y", "%d %B %Y", "%d.%m.%Y"):
+                    try:
+                        parsed_date = datetime.strptime(closing_date, fmt)
+                        break
+                    except ValueError:
+                        pass
+
+                if parsed_date and parsed_date < current_date:
+                    self.logger.debug(f"Oportunidade expirada ignorada: {closing_date}")
+                    continue
+
             item = EacItem()
+            item['closing_date'] = closing_date
             item['title'] = funding.get('title', 'No title')
-            item['closing_date'] = funding.get('deadlineDate', 'No deadline day')
             item['closing_time'] = funding.get('deadlineTime', 'No deadline time')
             item['link'] = response.urljoin(funding.get('url', 'No link'))
             item['country'] = 'União Europeia'

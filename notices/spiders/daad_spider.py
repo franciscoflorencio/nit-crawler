@@ -27,7 +27,6 @@ class DaadSpider(scrapy.Spider):
     async def parse(self, response):
         self.logger.info(f"Parsing page: {response.url}")
 
-        # Select all items from the scholarship list
         opportunities_list = response.css("li.c-scholarship-list__item")
 
         if not opportunities_list:

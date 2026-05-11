@@ -14,10 +14,14 @@ class AnrSpider(scrapy.Spider):
         "DOWNLOAD_HANDLERS": {
             "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
             "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-        }
+        },
+        "PLAYWRIGHT_PAGE_GOTO_KWARGS": {
+            "wait_until": "domcontentloaded",
+            "timeout": 60000,
+        },
     }
 
-    def start_requests(self):
+    async def start(self):
         for url in self.start_urls:
             yield scrapy.Request(
                 url,
