@@ -1,33 +1,24 @@
 import scrapy
+import re
 from notices.items import DaadItem
 
 
 class DaadSpider(scrapy.Spider):
     name = "daad"
     allowed_domains = ["www.daad-brasil.org"]
+    start_urls = ["https://www.daad-brasil.org/pt/bolsas/busca/?language=pt"]
 
     custom_settings = {
-        "PLAYWRIGHT_BROWSER_TYPE": "chromium",
         "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "ROBOTSTXT_OBEY": False,
         "DEFAULT_REQUEST_HEADERS": {
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
         },
-        "PLAYWRIGHT_CONTEXTS": {
-            "default": {
-                "locale": "pt-BR",
-                "timezone_id": "America/Sao_Paulo",
-            }
-        },
     }
 
-    async def start(self):
-        url = "https://www.daad-brasil.org/pt/bolsas/busca/?language=pt"
-        yield scrapy.Request(url, meta={"playwright": True}, callback=self.parse)
-
-    async def parse(self, response):
+    def parse(self, response):
         self.logger.info(f"Parsing page: {response.url}")
 
-        # Select all items from the scholarship list
         opportunities_list = response.css("li.c-scholarship-list__item")
 
         if not opportunities_list:
@@ -56,6 +47,15 @@ class DaadSpider(scrapy.Spider):
             status_texts = opportunity.xpath('.//dt[contains(., "Status:")]/following-sibling::dd[1]//text()').getall()
             status = ", ".join([t.strip() for t in status_texts if t.strip()])
 
+            if deadline:
+                match = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", deadline)
+                if match:
+                    daad_item["closing_date"] = f"{match.group(1)}/{match.group(2)}/{match.group(3)}"
+                else:
+                    daad_item["closing_date"] = deadline
+            else:
+                daad_item["closing_date"] = None
+
             observations = []
             if deadline: observations.append(f"Prazo: {deadline}")
             if status: observations.append(f"Status alvo: {status}")
@@ -66,7 +66,10 @@ class DaadSpider(scrapy.Spider):
             if daad_item.get("title"):
                 yield daad_item
 
-        # Handle pagination (Next page arrow)
-        next_page = response.css('a[aria-label="Próxima página"]::attr(href)').get()
+        # Handle pagination
+        next_page = response.xpath('//select[@id="pagination"]/option[@selected]/following-sibling::option[1]/@value').get()
+        if not next_page:
+            next_page = response.css('a[aria-label="Próxima página"]::attr(href)').get()
+
         if next_page:
-            yield response.follow(next_page, callback=self.parse, meta={"playwright": True})
+            yield response.follow(next_page, callback=self.parse)
