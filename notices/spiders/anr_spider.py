@@ -7,73 +7,33 @@ class AnrSpider(scrapy.Spider):
     allowed_domains = ["anr.fr"]
     start_urls = ["https://anr.fr/en/open-calls-and-preannouncements/"]
 
-    custom_settings = {
-        "PLAYWRIGHT_BROWSER_TYPE": "firefox",
-        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "ROBOTSTXT_OBEY": False,
-        "DOWNLOAD_HANDLERS": {
-            "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-            "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-        },
-        "PLAYWRIGHT_PAGE_GOTO_KWARGS": {
-            "wait_until": "domcontentloaded",
-            "timeout": 60000,
-        },
-    }
-
-    async def start(self):
-        for url in self.start_urls:
-            yield scrapy.Request(
-                url,
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                    "playwright_context_kwargs": {
-                        "ignore_https_errors": True,
-                    },
-                },
-                callback=self.parse,
-            )
-
     def parse(self, response):
-        accordion = response.css('div.accordion.accordion--search')
-
-        for opportunity in accordion.css('div.card.appel'):
-
-            date_div = opportunity.css('div.date.my-2::text').getall()
-            compound_date = ''.join([date.strip() for date in date_div if date.strip()])
-            split_date = compound_date.split('-')
-
-            if len(split_date) >= 2:
-                opening_date = split_date[0].strip()
-                closing_date = split_date[1].strip()
-            else:
-                opening_date = compound_date
-                closing_date = None
+        for opportunity in response.css('div.card.appel'):
 
             anr_item = AnrItem()
 
-            anr_item['observation'] = opportunity.css('span.tag-type::text').get().strip()
-            anr_item['opening_date'] = opening_date
-            anr_item['closing_date'] = closing_date
-            anr_item['title'] = opportunity.css('h2 a::text').get().strip()
-            anr_item['description'] = opportunity.css('p::text').get().strip()
-            anr_item['link'] = response.urljoin(opportunity.css('h2 a::attr(href)').get())
-            anr_item['country'] = "França"
-            yield anr_item
+            title_raw = opportunity.css('h2 a::text').get()
+            anr_item['title'] = title_raw.strip() if title_raw else None
 
-        next_page = response.css('ul.pagination li.page-item:not(.active) a.page-link-next::attr(href)').get()
+            link_raw = opportunity.css('h2 a::attr(href)').get()
+            anr_item['link'] = response.urljoin(link_raw) if link_raw else None
+
+            date_raw = opportunity.css('div.date::text').getall()
+            date_text = " ".join([d.strip() for d in date_raw if d.strip()])
+            if date_text:
+                if '-' in date_text:
+                    split_date = date_text.split('-')
+                    anr_item['opening_date'] = split_date[0].strip()
+                    anr_item['closing_date'] = split_date[1].strip()
+                else:
+                    anr_item['opening_date'] = date_text.strip()
+                    anr_item['closing_date'] = None
+
+            anr_item['country'] = "França"
+
+            if anr_item.get('title') and anr_item.get('link'):
+                yield anr_item
+
+        next_page = response.css('a.page-link-next::attr(href)').get()
         if next_page:
-            next_page_url = response.urljoin(next_page)
-            self.logger.info(f"Following next page: {next_page_url}")
-            yield scrapy.Request(
-                next_page_url,
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                    "playwright_context_kwargs": {
-                        "ignore_https_errors": True,
-                    },
-                },
-                callback=self.parse,
-            )
+            yield response.follow(next_page, callback=self.parse)
