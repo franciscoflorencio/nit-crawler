@@ -52,6 +52,7 @@ class DaadItem(scrapy.Item):
     observation = scrapy.Field()
     description = scrapy.Field()
     link = scrapy.Field()
+    closing_date = scrapy.Field()
     country = scrapy.Field()
 
 
