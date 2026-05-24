@@ -40,28 +40,41 @@ class DaadSpider(scrapy.Spider):
             link_url = opportunity.css("h3 a::attr(href)").get()
 
             daad_item["title"] = title.strip() if title else None
-            daad_item["link"] = response.urljoin(link_url) if link_url else None
+            if link_url:
+                daad_item["link"] = response.urljoin(link_url)
+            else:
+                daad_item["link"] = None
 
             # Extract description
             description = opportunity.css("p.u-size-teaser::text").get()
-            daad_item["description"] = description.strip() if description else None
+            if description:
+                daad_item["description"] = description.strip()
+            else:
+                daad_item["description"] = None
 
             # Extract deadline and status to compose observation
             deadline_texts = opportunity.xpath(
                 './/dt[contains(., "Prazo de inscrição:")]'
                 '/following-sibling::dd[1]//text()'
             ).getall()
-            deadline = " ".join([t.strip() for t in deadline_texts if t.strip()])
+            deadline = " ".join(
+                [t.strip() for t in deadline_texts if t.strip()]
+            )
 
             status_texts = opportunity.xpath(
-                './/dt[contains(., "Status:")]/following-sibling::dd[1]//text()'
+                './/dt[contains(., "Status:")]'
+                '/following-sibling::dd[1]//text()'
             ).getall()
-            status = ", ".join([t.strip() for t in status_texts if t.strip()])
+            status = ", ".join(
+                [t.strip() for t in status_texts if t.strip()]
+            )
 
             if deadline:
                 match = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", deadline)
                 if match:
-                    daad_item["closing_date"] = f"{match.group(1)}/{match.group(2)}/{match.group(3)}"
+                    daad_item["closing_date"] = (
+                        f"{match.group(1)}/{match.group(2)}/{match.group(3)}"
+                    )
                 else:
                     daad_item["closing_date"] = deadline
             else:
