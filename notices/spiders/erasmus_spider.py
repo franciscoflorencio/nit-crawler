@@ -9,14 +9,14 @@ from typing import Any, Iterable
 class EramusSpider(scrapy.Spider):
     name = "erasmus"
     custom_settings = {
-            'ITEM_PIPELINES': {
-                'notices.pipelines.EacPipeline': 100
-            },
-            'ROBOTSTXT_OBEY': False,
-            'DOWNLOAD_DELAY': 7,
-            'CONCURRENT_REQUESTS': 7,
-            'RETRY_TIMES': 35,
-            'RETRY_HTTP_CODES': [500, 502, 503, 504, 400, 403, 404, 408],
+        'ITEM_PIPELINES': {
+            'notices.pipelines.EacPipeline': 100
+        },
+        'ROBOTSTXT_OBEY': False,
+        'DOWNLOAD_DELAY': 7,
+        'CONCURRENT_REQUESTS': 7,
+        'RETRY_TIMES': 35,
+        'RETRY_HTTP_CODES': [500, 502, 503, 504, 400, 403, 404, 408],
     }
     allowed_domains = ["erasmus-plus.ec.europa.eu"]
 

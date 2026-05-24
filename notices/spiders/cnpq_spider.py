@@ -39,11 +39,11 @@ class CnpqSpider(scrapy.Spider):
         for i, notice in enumerate(notices):
             date_selector = response.css('div.inscricao ul.datas li::text')
             if i < len(date_selector):
-                date_text = date_selector[i].get()
+                date_text = date_selector[i].get() or ""
             else:
                 date_text = ""
 
-            dates = str(date_text).split(' a ')
+            dates = date_text.split(' a ') if date_text else []
 
             item = CnpqItem()
             item['title'] = notice.css('h4::text').get(default='').strip()
