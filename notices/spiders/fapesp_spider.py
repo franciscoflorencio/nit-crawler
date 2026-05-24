@@ -12,6 +12,11 @@ class FapespSpider(scrapy.Spider):
     custom_settings = {
         "PLAYWRIGHT_BROWSER_TYPE": "chromium",
         "PLAYWRIGHT_IGNORE_HTTPS_ERRORS": True,
+        "USER_AGENT": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.0.0 Safari/537.36"
+            ),
         "PLAYWRIGHT_CONTEXT_ARGS": {
             "ignore_https_errors": True,
             "viewport": {"width": 1280, "height": 720},
