@@ -1,4 +1,6 @@
 import scrapy
+from scrapy.http import Response
+from typing import Any, Iterable
 from notices.items import AnrItem
 
 
@@ -7,9 +9,8 @@ class AnrSpider(scrapy.Spider):
     allowed_domains = ["anr.fr"]
     start_urls = ["https://anr.fr/en/open-calls-and-preannouncements/"]
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Any]:
         for opportunity in response.css('div.card.appel'):
-
             anr_item = AnrItem()
 
             title_raw = opportunity.css('h2 a::text').get()

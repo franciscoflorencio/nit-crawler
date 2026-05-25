@@ -1,5 +1,8 @@
 import scrapy
+from scrapy.http import Response
+from typing import Any, Iterable
 from notices.items import FapespItem
+
 
 class FapespSpider(scrapy.Spider):
     name = "fapesp"
@@ -9,6 +12,11 @@ class FapespSpider(scrapy.Spider):
     custom_settings = {
         "PLAYWRIGHT_BROWSER_TYPE": "chromium",
         "PLAYWRIGHT_IGNORE_HTTPS_ERRORS": True,
+        "USER_AGENT": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.0.0 Safari/537.36"
+            ),
         "PLAYWRIGHT_CONTEXT_ARGS": {
             "ignore_https_errors": True,
             "viewport": {"width": 1280, "height": 720},
@@ -25,18 +33,38 @@ class FapespSpider(scrapy.Spider):
         },
     }
 
-    def start_requests(self):
+    def start_requests(self) -> Iterable[scrapy.Request]:
         url = "https://fapesp.br/oportunidades/"
         yield scrapy.Request(url, meta={"playwright": True})
 
-    def parse(self, response):
-        for opportunity in response.css('ul.list li.box_col:not([style*="display: none"])'):
+    def parse(self, response: Response, **kwargs: Any) -> Iterable[Any]:
+        items = response.css(
+            'ul.list li.box_col:not([style*="display: none"])'
+        )
+        for opportunity in items:
+            institution = opportunity.xpath(
+                './/span[@class="text-principal"]/strong[contains(text(), '
+                '"Instituição")]/following-sibling::text()[1]'
+            ).get(default="").strip()
+            city = opportunity.xpath(
+                './/span[@class="text-principal"]/strong[contains(text(), '
+                '"Cidade")]/following-sibling::text()[1]'
+            ).get(default="").strip()
+            closing_date = opportunity.xpath(
+                './/span[@class="text-principal"]/strong[contains(text(), '
+                '"Inscrições até") or contains(text(), '
+                '"Deadline")]/following-sibling::text()[1]'
+            ).get(default="").strip()
+
             yield FapespItem(
-                    title = opportunity.css('strong.title::text').get().strip(),
-                    institution = opportunity.xpath('.//span[@class="text-principal"]/strong[contains(text(), "Instituição")]/following-sibling::text()[1]').get().strip(),
-                    city = opportunity.xpath('.//span[@class="text-principal"]/strong[contains(text(), "Cidade")]/following-sibling::text()[1]').get().strip(),
-                    closing_date = opportunity.xpath('.//span[@class="text-principal"]/strong[contains(text(), "Inscrições até") or contains(text(), "Deadline")]/following-sibling::text()[1]').get().strip(),
-                    description = opportunity.css('span.text-resumo p::text').get().strip(),
-                    link = opportunity.css('a.link_col::attr(href)').get(),
-                    country = "Brasil"
+                title=opportunity.css('strong.title::text').get(
+                    default="").strip(),
+                institution=institution,
+                city=city,
+                closing_date=closing_date,
+                description=opportunity.css(
+                    'span.text-resumo p::text'
+                ).get(default="").strip(),
+                link=opportunity.css('a.link_col::attr(href)').get(),
+                country="Brasil"
             )
